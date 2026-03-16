@@ -5,6 +5,7 @@
   <title>Miran's Secret Laboratory</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
@@ -501,8 +502,8 @@
   <nav id="nav">
     <div class="nav-logo">LAB::MIRAN</div>
     <ul class="nav-links">
-      <li><a href="#experiments" class="anchor-link" data-i18n="nav_experiments">Experiments</a></li>
-      <li><a href="https://enkjones.github.io/" target="_blank" data-i18n="nav_github">GitHub Pages</a></li>
+      <!-- <li><a href="#experiments" class="anchor-link" data-i18n="nav_experiments">Experiments</a></li>
+      <li><a href="https://enkjones.github.io/" target="_blank" data-i18n="nav_github">GitHub Pages</a></li> -->
     </ul>
     <div class="nav-controls">
       <div class="lang-switcher">
@@ -531,7 +532,7 @@
 
     <div class="hero-cta" id="hero-cta">
       <a class="btn btn-primary anchor-link" href="#experiments" data-i18n="cta_enter">ENTER THE LAB →</a>
-      <a class="btn btn-secondary" href="https://enkjones.github.io/" target="_blank" data-i18n="cta_github">GITHUB PAGES</a>
+      <!-- <a class="btn btn-secondary" href="https://enkjones.github.io/" target="_blank" data-i18n="cta_github">GITHUB PAGES</a> -->
     </div>
   </section>
 
@@ -569,7 +570,7 @@
         <div class="card-icon">📄</div>
         <h3>Stirling PDF</h3>
         <p data-i18n="card_pdf_desc">Merge, split, compress and convert documents. Full PDF toolkit, no cloud required.</p>
-        <a class="card-link" href="http://192.168.178.193:8081/" data-i18n="card_cta">Access Lab</a>
+        <a class="card-link" href="https://pdf.mrns.space" data-i18n="card_cta">Access Lab</a>
       </article>
 
       <article class="card card-mon">
@@ -577,7 +578,7 @@
         <div class="card-icon">📡</div>
         <h3>Beszel Monitor</h3>
         <p data-i18n="card_mon_desc">Real-time CPU, RAM, disk and network telemetry for every container in the lab.</p>
-        <a class="card-link" href="http://192.168.178.193:8082/" data-i18n="card_cta">Access Lab</a>
+        <a class="card-link" href="https://monitor.mrns.space" data-i18n="card_cta">Access Lab</a>
       </article>
 
       <article class="card card-cloud">
@@ -585,7 +586,7 @@
         <div class="card-icon">☁️</div>
         <h3>Nextcloud</h3>
         <p data-i18n="card_cloud_desc">Private file sync and collaboration platform. Your data stays in the lab — always.</p>
-        <a class="card-link" href="http://192.168.178.193:8083/" data-i18n="card_cta">Access Lab</a>
+        <a class="card-link" href="https://nxt.mrns.space" data-i18n="card_cta">Access Lab</a>
       </article>
 
       <article class="card card-web">
@@ -615,7 +616,7 @@
   </footer>
 
 <script>
-  gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
   /* ══════════════════════════════════════
      i18n — translations
@@ -785,24 +786,7 @@
     x: -30, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out'
   });
 
-  // ── ScrollTo plugin polyfill (no plugin needed — native proxy)
-  // GSAP scrollTo shim for window
-  if (!gsap.plugins.scrollTo) {
-    gsap.registerPlugin({
-      name: 'scrollTo',
-      init(target, vars) {
-        this.target = target === window ? document.documentElement : target;
-        this.endY   = vars.y !== undefined ? vars.y : vars;
-      },
-      render(progress) {
-        const cur  = this.target === document.documentElement ? window.scrollY : this.target.scrollTop;
-        const diff = this.endY - (this._startY !== undefined ? this._startY : (this._startY = cur));
-        const y    = this._startY + diff * progress;
-        if (this.target === document.documentElement) window.scrollTo(0, y);
-        else this.target.scrollTop = y;
-      }
-    });
-  }
+
 </script>
 </body>
 </html>
