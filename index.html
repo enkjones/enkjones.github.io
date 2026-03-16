@@ -1,18 +1,808 @@
-<html>
-  <head> <style> * { font-family: Arial, Helvetica, sans-serif; } </style> </head>
-  <body style=" margin: 4rem; background: #f4f4f4; color: #333; ">
-    <h1>Miran's Lab</h1>
-    <p>I'm hosted with
-      <a href="https://enkjones.github.io/">GitHub Pages</a> and
-      <a href="http://192.168.178.171:8080/">ProxMoxPortainer MA</a>.
-    </p>
-    <!-- <p>Using Flask Webhook</p> -->
-    <p>Using Cron Job to Autodeploy from GitHub</p>
-    <p>Currently useful links:</p>
-    <ul>
-      <li><a href="http://192.168.178.171:8081/">PDF Editor</a></li>
-      <li><a href="http://192.168.178.171:8082/">Monitoring</a></li>
-      <li><a href="http://192.168.178.171:8083/">Cloud</a></li>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Miran's Secret Laboratory</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+    :root {
+      --dexter-white: #f0f4ff;
+      --dexter-blue: #1a1aff;
+      --dexter-darkblue: #0a0a2e;
+      --dexter-purple: #6600cc;
+      --dexter-magenta: #ff00cc;
+      --dexter-cyan: #00ffff;
+      --dexter-yellow: #ffe600;
+      --dexter-red: #ff2200;
+      --panel: rgba(10, 10, 60, 0.85);
+      --grid: rgba(0, 255, 255, 0.07);
+      --body-bg: #0a0a2e;
+      --text-primary: #f0f4ff;
+      --nav-bg: rgba(10,10,46,0.95);
+      --terminal-bg: rgba(0,0,0,0.6);
+      --footer-color: rgba(255,255,255,0.25);
+      --card-text: rgba(255,255,255,0.5);
+    }
+
+    /* ─── LIGHT MODE ─── */
+    body.light {
+      --body-bg: #e8eaf6;
+      --dexter-white: #0a0a2e;
+      --text-primary: #0a0a2e;
+      --panel: rgba(255,255,255,0.88);
+      --grid: rgba(0, 100, 200, 0.08);
+      --nav-bg: rgba(255,255,255,0.97);
+      --terminal-bg: rgba(220,225,255,0.8);
+      --footer-color: rgba(10,10,60,0.4);
+      --card-text: rgba(10,10,60,0.65);
+    }
+    body.light { background: var(--body-bg); color: var(--text-primary); }
+    body.light::before { opacity: 0.6; }
+    body.light::after  { opacity: 0.15; }
+    body.light .nav-logo { color: var(--dexter-blue); text-shadow: 0 0 8px rgba(26,26,255,0.3); }
+    body.light nav { background: var(--nav-bg); border-bottom-color: var(--dexter-blue); }
+    body.light .nav-links a { color: #0a0a2e; }
+    body.light .card { border-color: rgba(26,26,255,0.2); }
+    body.light .card p { color: var(--card-text); }
+    body.light .terminal-bar { background: var(--terminal-bg); border-color: rgba(26,26,255,0.2); }
+    body.light .stat { color: #0a0a2e; }
+    body.light .ticker-wrap { background: rgba(26,26,255,0.06); border-color: rgba(26,26,255,0.2); }
+    body.light .ticker span { color: var(--dexter-blue); }
+    body.light footer { color: var(--footer-color); border-top-color: rgba(10,10,60,0.12); }
+    body.light .hero-sub { color: rgba(10,10,60,0.55); }
+    body.light .hero h1 .line-white { color: #0a0a2e; }
+    body.light .btn-secondary { color: var(--dexter-blue); border-color: var(--dexter-blue); }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: auto; } /* GSAP handles scroll, disable native */
+
+    body {
+      background: var(--body-bg, var(--dexter-darkblue));
+      color: var(--text-primary, var(--dexter-white));
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── GRID BACKGROUND ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── SCANLINES ─── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.08) 0px,
+        rgba(0,0,0,0.08) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10,10,46,0.95);
+      border-bottom: 2px solid var(--dexter-cyan);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--dexter-cyan);
+      text-shadow: 0 0 12px var(--dexter-cyan);
+      letter-spacing: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--dexter-white);
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--dexter-cyan); }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      overflow: hidden;
+    }
+
+    /* Spinning rings */
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid;
+      opacity: 0.18;
+    }
+    .ring-1 { width: 600px; height: 600px; border-color: var(--dexter-cyan); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .ring-2 { width: 900px; height: 900px; border-color: var(--dexter-magenta); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .ring-3 { width: 1200px; height: 1200px; border-color: var(--dexter-purple); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+    .badge {
+      display: inline-block;
+      background: var(--dexter-magenta);
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 20px var(--dexter-magenta);
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      line-height: 1.05;
+      letter-spacing: -1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero h1 .line-white { color: var(--dexter-white); display: block; }
+    .hero h1 .line-cyan  { color: var(--dexter-cyan); display: block; text-shadow: 0 0 30px var(--dexter-cyan), 0 0 60px var(--dexter-cyan); }
+
+    .hero-sub {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 0.85rem 2rem;
+      border: 2px solid;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: currentColor;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn:hover::before { opacity: 0.12; }
+
+    .btn-primary { color: var(--dexter-darkblue); background: var(--dexter-cyan); border-color: var(--dexter-cyan); box-shadow: 0 0 24px var(--dexter-cyan); }
+    .btn-primary:hover { box-shadow: 0 0 40px var(--dexter-cyan); }
+    .btn-secondary { color: var(--dexter-cyan); background: transparent; border-color: var(--dexter-cyan); }
+
+    /* ─── STATUS TICKER ─── */
+    .ticker-wrap {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      background: rgba(0,255,255,0.06);
+      border-top: 1px solid rgba(0,255,255,0.2);
+      border-bottom: 1px solid rgba(0,255,255,0.2);
+      overflow: hidden;
+      padding: 0.6rem 0;
+    }
+
+    .ticker {
+      display: flex;
+      gap: 4rem;
+      width: max-content;
+      animation: ticker 28s linear infinite;
+    }
+
+    .ticker span {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--dexter-cyan);
+      white-space: nowrap;
+    }
+
+    .ticker span::before { content: '◆ '; color: var(--dexter-magenta); }
+
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ─── SECTION LABEL ─── */
+    .section-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--dexter-magenta);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ─── EXPERIMENTS (SERVICES) ─── */
+    .experiments {
+      position: relative;
+      z-index: 2;
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .experiments-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .experiments-header h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 900;
+      color: var(--dexter-white);
+    }
+
+    .experiments-header h2 span { color: var(--dexter-cyan); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(0,255,255,0.15);
+      border-radius: 6px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent, var(--dexter-cyan));
+      box-shadow: 0 0 12px var(--accent, var(--dexter-cyan));
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent, var(--dexter-cyan));
+      box-shadow: 0 8px 40px rgba(0,255,255,0.12);
+    }
+
+    .card-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 3px;
+      color: var(--accent, var(--dexter-cyan));
+      margin-bottom: 0.5rem;
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.6rem;
+      color: var(--dexter-white);
+    }
+
+    .card p {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--accent, var(--dexter-cyan));
+      transition: gap 0.2s;
+    }
+
+    .card-link:hover { gap: 0.7rem; }
+    .card-link::after { content: '→'; }
+
+    /* card accent colours */
+    .card-pdf   { --accent: #ff6b6b; }
+    .card-mon   { --accent: var(--dexter-cyan); }
+    .card-cloud { --accent: var(--dexter-yellow); }
+    .card-web   { --accent: var(--dexter-magenta); }
+
+    /* ─── TERMINAL STATUS BAR ─── */
+    .terminal-bar {
+      position: relative;
+      z-index: 2;
+      background: rgba(0,0,0,0.6);
+      border-top: 1px solid rgba(0,255,255,0.2);
+      border-bottom: 1px solid rgba(0,255,255,0.2);
+      padding: 1.5rem 2rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+    }
+
+    .stat-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--dexter-cyan);
+      box-shadow: 0 0 8px var(--dexter-cyan);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    .stat-dot.red   { background: var(--dexter-red);     box-shadow: 0 0 8px var(--dexter-red); }
+    .stat-dot.yellow{ background: var(--dexter-yellow);  box-shadow: 0 0 8px var(--dexter-yellow); }
+    .stat-dot.green { background: #00ff88;               box-shadow: 0 0 8px #00ff88; }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 3rem 2rem;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    footer span, footer a { color: var(--dexter-magenta); text-decoration: none; }
+
+    /* ─── NAV CONTROLS (theme + lang) ─── */
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      background: none;
+      border: 1.5px solid var(--dexter-cyan);
+      color: var(--dexter-cyan);
+      border-radius: 3px;
+      width: 34px; height: 34px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .theme-toggle:hover { background: rgba(0,255,255,0.1); box-shadow: 0 0 12px var(--dexter-cyan); }
+    body.light .theme-toggle { border-color: var(--dexter-blue); color: var(--dexter-blue); }
+    body.light .theme-toggle:hover { background: rgba(26,26,255,0.1); box-shadow: 0 0 12px var(--dexter-blue); }
+
+    /* Lang switcher */
+    .lang-switcher {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .lang-btn {
+      background: none;
+      border: 1.5px solid rgba(0,255,255,0.3);
+      color: rgba(0,255,255,0.5);
+      border-radius: 3px;
+      padding: 0.2rem 0.45rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn.active,
+    .lang-btn:hover {
+      border-color: var(--dexter-cyan);
+      color: var(--dexter-cyan);
+      box-shadow: 0 0 8px var(--dexter-cyan);
+    }
+    body.light .lang-btn { border-color: rgba(26,26,255,0.25); color: rgba(26,26,255,0.5); }
+    body.light .lang-btn.active,
+    body.light .lang-btn:hover { border-color: var(--dexter-blue); color: var(--dexter-blue); box-shadow: 0 0 8px rgba(26,26,255,0.4); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .hero { padding-top: 5rem; }
+      .lang-btn { padding: 0.15rem 0.35rem; font-size: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="nav-logo">LAB::MIRAN</div>
+    <ul class="nav-links">
+      <li><a href="#experiments" class="anchor-link" data-i18n="nav_experiments">Experiments</a></li>
+      <li><a href="https://enkjones.github.io/" target="_blank" data-i18n="nav_github">GitHub Pages</a></li>
     </ul>
-  </body>
+    <div class="nav-controls">
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="de">DE</button>
+        <button class="lang-btn" data-lang="hr">HR</button>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="ring ring-1" id="r1"></div>
+    <div class="ring ring-2" id="r2"></div>
+    <div class="ring ring-3" id="r3"></div>
+
+    <div class="badge" id="badge" data-i18n="badge">⚗ SECRET LABORATORY — ACCESS GRANTED</div>
+
+    <h1 id="hero-title">
+      <span class="line-white" id="line1">MIRAN'S</span>
+      <span class="line-cyan"  id="line2">LABORATORY</span>
+    </h1>
+
+    <p class="hero-sub" id="hero-sub">Proxmox · Docker · Self-Hosted · v2.0.26</p>
+
+    <div class="hero-cta" id="hero-cta">
+      <a class="btn btn-primary anchor-link" href="#experiments" data-i18n="cta_enter">ENTER THE LAB →</a>
+      <a class="btn btn-secondary" href="https://enkjones.github.io/" target="_blank" data-i18n="cta_github">GITHUB PAGES</a>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <span>All systems nominal</span>
+      <span>Containers running</span>
+      <span>Nextcloud synced</span>
+      <span>Beszel monitoring active</span>
+      <span>Latest commit auto-deployed</span>
+      <span>Proxmox host healthy</span>
+      <span>Stirling PDF ready</span>
+      <span>All systems nominal</span>
+      <span>Containers running</span>
+      <span>Nextcloud synced</span>
+      <span>Beszel monitoring active</span>
+      <span>Latest commit auto-deployed</span>
+      <span>Proxmox host healthy</span>
+      <span>Stirling PDF ready</span>
+    </div>
+  </div>
+
+  <!-- EXPERIMENTS -->
+  <section class="experiments" id="experiments">
+    <div class="experiments-header">
+      <p class="section-label" data-i18n="section_label">Active Experiments</p>
+      <h2>LAB <span data-i18n="section_title">DIRECTORY</span></h2>
+    </div>
+
+    <div class="cards">
+
+      <article class="card card-pdf">
+        <div class="card-number">EXP-001</div>
+        <div class="card-icon">📄</div>
+        <h3>Stirling PDF</h3>
+        <p data-i18n="card_pdf_desc">Merge, split, compress and convert documents. Full PDF toolkit, no cloud required.</p>
+        <a class="card-link" href="http://192.168.178.193:8081/" data-i18n="card_cta">Access Lab</a>
+      </article>
+
+      <article class="card card-mon">
+        <div class="card-number">EXP-002</div>
+        <div class="card-icon">📡</div>
+        <h3>Beszel Monitor</h3>
+        <p data-i18n="card_mon_desc">Real-time CPU, RAM, disk and network telemetry for every container in the lab.</p>
+        <a class="card-link" href="http://192.168.178.193:8082/" data-i18n="card_cta">Access Lab</a>
+      </article>
+
+      <article class="card card-cloud">
+        <div class="card-number">EXP-003</div>
+        <div class="card-icon">☁️</div>
+        <h3>Nextcloud</h3>
+        <p data-i18n="card_cloud_desc">Private file sync and collaboration platform. Your data stays in the lab — always.</p>
+        <a class="card-link" href="http://192.168.178.193:8083/" data-i18n="card_cta">Access Lab</a>
+      </article>
+
+      <article class="card card-web">
+        <div class="card-number">EXP-004</div>
+        <div class="card-icon">🌐</div>
+        <h3>GitHub Pages Mirror</h3>
+        <p data-i18n="card_web_desc">Auto-deployed every 60 s via cron sync. Latest commit is always live — no pipeline needed.</p>
+        <a class="card-link" href="https://enkjones.github.io/" target="_blank" data-i18n="card_cta">Access Lab</a>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- STATUS BAR -->
+  <div class="terminal-bar">
+    <div class="stat"><div class="stat-dot green"></div>PORTAINER — RUNNING</div>
+    <div class="stat"><div class="stat-dot green"></div>NEXTCLOUD — RUNNING</div>
+    <div class="stat"><div class="stat-dot green"></div>MARIADB — RUNNING</div>
+    <div class="stat"><div class="stat-dot green"></div>STIRLING PDF — HEALTHY</div>
+    <div class="stat"><div class="stat-dot green"></div>BESZEL HUB — RUNNING</div>
+    <div class="stat"><div class="stat-dot yellow"></div>AGENT — MONITORING</div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>MIRAN'S SECRET LABORATORY &nbsp;·&nbsp; PROXMOX + DOCKER &nbsp;·&nbsp; BUILT BY <a href="https://miran.at/">MIRAN</a> &nbsp;·&nbsp; 2026</p>
+  </footer>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ══════════════════════════════════════
+     i18n — translations
+  ══════════════════════════════════════ */
+  const LANGS = {
+    en: {
+      nav_experiments: 'Experiments',
+      nav_github: 'GitHub Pages',
+      badge: '⚗ SECRET LABORATORY — ACCESS GRANTED',
+      cta_enter: 'ENTER THE LAB →',
+      cta_github: 'GITHUB PAGES',
+      section_label: 'Active Experiments',
+      section_title: 'DIRECTORY',
+      card_pdf_desc:   'Merge, split, compress and convert documents. Full PDF toolkit, no cloud required.',
+      card_mon_desc:   'Real-time CPU, RAM, disk and network telemetry for every container in the lab.',
+      card_cloud_desc: 'Private file sync and collaboration platform. Your data stays in the lab — always.',
+      card_web_desc:   'Auto-deployed every 60 s via cron sync. Latest commit is always live — no pipeline needed.',
+      card_cta: 'Access Lab',
+    },
+    de: {
+      nav_experiments: 'Experimente',
+      nav_github: 'GitHub-Seite',
+      badge: '⚗ GEHEIMES LABOR — ZUGANG GEWÄHRT',
+      cta_enter: 'LABOR BETRETEN →',
+      cta_github: 'GITHUB-SEITE',
+      section_label: 'Aktive Experimente',
+      section_title: 'VERZEICHNIS',
+      card_pdf_desc:   'PDF-Dateien zusammenführen, aufteilen, komprimieren und konvertieren. Kein Cloud-Dienst nötig.',
+      card_mon_desc:   'Echtzeit-CPU-, RAM-, Festplatten- und Netzwerk-Telemetrie für jeden Container im Labor.',
+      card_cloud_desc: 'Private Dateisynchronisation. Deine Daten bleiben im Labor — immer.',
+      card_web_desc:   'Automatisch alle 60 s per Cron-Sync bereitgestellt. Neuester Commit immer live.',
+      card_cta: 'Labor öffnen',
+    },
+    hr: {
+      nav_experiments: 'Eksperimenti',
+      nav_github: 'GitHub Stranice',
+      badge: '⚗ TAJNI LABORATORIJ — PRISTUP ODOBREN',
+      cta_enter: 'UĐI U LAB →',
+      cta_github: 'GITHUB STRANICE',
+      section_label: 'Aktivni eksperimenti',
+      section_title: 'IMENIK',
+      card_pdf_desc:   'Spajanje, dijeljenje, komprimiranje i pretvorba dokumenata. Potpuni PDF alat, bez oblaka.',
+      card_mon_desc:   'Telemetrija CPU-a, RAM-a, diska i mreže u stvarnom vremenu za svaki kontejner.',
+      card_cloud_desc: 'Privatna sinkronizacija datoteka. Tvoji podaci ostaju u laboratoriju — uvijek.',
+      card_web_desc:   'Automatski postavljeno svakih 60 s putem cron sinkronizacije. Najnoviji commit uvijek uživo.',
+      card_cta: 'Otvori Lab',
+    },
+  };
+
+  let currentLang = localStorage.getItem('lang') || 'en';
+
+  function applyLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    const t = LANGS[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    document.documentElement.lang = lang;
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tl = gsap.timeline();
+      tl.to('body', { opacity: 0, duration: 0.18, ease: 'power2.in' })
+        .call(() => applyLang(btn.dataset.lang))
+        .to('body', { opacity: 1, duration: 0.25, ease: 'power2.out' });
+    });
+  });
+
+  applyLang(currentLang);
+
+  /* ══════════════════════════════════════
+     Theme toggle
+  ══════════════════════════════════════ */
+  const themeBtn = document.getElementById('themeToggle');
+  let isDark = localStorage.getItem('theme') !== 'light';
+
+  function applyTheme(dark) {
+    isDark = dark;
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+    document.body.classList.toggle('light', !dark);
+    themeBtn.textContent = dark ? '🌙' : '☀️';
+  }
+
+  themeBtn.addEventListener('click', () => {
+    const tl = gsap.timeline();
+    tl.to(themeBtn, { scale: 0, rotation: 180, duration: 0.2, ease: 'back.in(2)' })
+      .call(() => applyTheme(!isDark))
+      .to(themeBtn, { scale: 1, rotation: 0, duration: 0.3, ease: 'back.out(2)' });
+  });
+
+  applyTheme(isDark);
+
+  /* ══════════════════════════════════════
+     Funky GSAP smooth anchor scroll
+  ══════════════════════════════════════ */
+  document.querySelectorAll('.anchor-link').forEach(link => {
+    link.addEventListener('click', e => {
+      const href = link.getAttribute('href');
+      if (!href.startsWith('#')) return;
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (!target) return;
+
+      const targetY = target.getBoundingClientRect().top + window.scrollY - 80;
+
+      // Flash overlay glitch
+      const flash = document.createElement('div');
+      flash.style.cssText = 'position:fixed;inset:0;background:var(--dexter-cyan);opacity:0;z-index:9999;pointer-events:none;mix-blend-mode:overlay;';
+      document.body.appendChild(flash);
+
+      gsap.timeline()
+        .to(flash,   { opacity: 0.18, duration: 0.08 })
+        .to(flash,   { opacity: 0,    duration: 0.15 })
+        .to(window,  { scrollTo: { y: targetY, autoKill: false }, duration: 1.1, ease: 'expo.inOut' }, 0.05)
+        .call(() => flash.remove());
+    });
+  });
+
+  /* ══════════════════════════════════════
+     Existing animations
+  ══════════════════════════════════════ */
+
+  // ── NAV slide in
+  gsap.from('#nav', { y: -60, opacity: 0, duration: 0.8, ease: 'power3.out' });
+
+  // ── Rings spin
+  gsap.to('#r1', { rotation: 360,  duration: 24, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+  gsap.to('#r2', { rotation: -360, duration: 36, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+  gsap.to('#r3', { rotation: 360,  duration: 60, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+
+  // ── Hero entrance
+  const heroTl = gsap.timeline({ delay: 0.3 });
+  heroTl
+    .from('#badge',    { y: 30, opacity: 0, duration: 0.6, ease: 'back.out(2)' })
+    .from('#line1',    { x: -80, opacity: 0, duration: 0.7, ease: 'power3.out' }, '-=0.2')
+    .from('#line2',    { x:  80, opacity: 0, duration: 0.7, ease: 'power3.out' }, '-=0.5')
+    .from('#hero-sub', { y: 20, opacity: 0, duration: 0.5 }, '-=0.2')
+    .from('#hero-cta', { y: 20, opacity: 0, duration: 0.5 }, '-=0.2');
+
+  // ── Cards stagger on scroll
+  gsap.from('.card', {
+    scrollTrigger: { trigger: '.cards', start: 'top 80%' },
+    y: 60, opacity: 0, duration: 0.6, stagger: 0.12, ease: 'power3.out'
+  });
+
+  // ── Cards hover glitch pulse
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mouseenter', () => gsap.to(card, { scale: 1.02, duration: 0.15, ease: 'power2.out' }));
+    card.addEventListener('mouseleave', () => gsap.to(card, { scale: 1,    duration: 0.25, ease: 'power2.inOut' }));
+  });
+
+  // ── Experiments header on scroll
+  gsap.from('.experiments-header', {
+    scrollTrigger: { trigger: '.experiments-header', start: 'top 85%' },
+    y: 30, opacity: 0, duration: 0.7, ease: 'power3.out'
+  });
+
+  // ── Status bar
+  gsap.from('.stat', {
+    scrollTrigger: { trigger: '.terminal-bar', start: 'top 90%' },
+    x: -30, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out'
+  });
+
+  // ── ScrollTo plugin polyfill (no plugin needed — native proxy)
+  // GSAP scrollTo shim for window
+  if (!gsap.plugins.scrollTo) {
+    gsap.registerPlugin({
+      name: 'scrollTo',
+      init(target, vars) {
+        this.target = target === window ? document.documentElement : target;
+        this.endY   = vars.y !== undefined ? vars.y : vars;
+      },
+      render(progress) {
+        const cur  = this.target === document.documentElement ? window.scrollY : this.target.scrollTop;
+        const diff = this.endY - (this._startY !== undefined ? this._startY : (this._startY = cur));
+        const y    = this._startY + diff * progress;
+        if (this.target === document.documentElement) window.scrollTo(0, y);
+        else this.target.scrollTop = y;
+      }
+    });
+  }
+</script>
+</body>
 </html>
