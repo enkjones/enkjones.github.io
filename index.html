@@ -488,6 +488,132 @@
     body.light .lang-btn.active,
     body.light .lang-btn:hover { border-color: var(--dexter-blue); color: var(--dexter-blue); box-shadow: 0 0 8px rgba(26,26,255,0.4); }
 
+    /* ─── INTRO ─── */
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .intro-panel {
+      position: absolute;
+      top: 0; height: 100%;
+      width: 50%;
+      background: #06061a;
+      will-change: transform;
+    }
+    #intro-left  { left: 0; }
+    #intro-right { right: 0; }
+    /* vertical shelf dividers */
+    .intro-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.025) 0, rgba(255,255,255,0.025) 1px,
+        transparent 1px, transparent 30px
+      );
+    }
+    /* coloured book spines */
+    .intro-panel::after {
+      content: '';
+      position: absolute;
+      bottom: 4%; left: 0; right: 0;
+      height: 20%;
+      background: repeating-linear-gradient(
+        90deg,
+        #3a005c 0,    #3a005c 14px,
+        #004a1e 14px, #004a1e 28px,
+        #5c0000 28px, #5c0000 40px,
+        #002f5c 40px, #002f5c 56px,
+        #5c2d00 56px, #5c2d00 68px,
+        #1a0033 68px, #1a0033 80px,
+        #003322 80px, #003322 94px,
+        #4d0000 94px, #4d0000 106px,
+        #00294d 106px, #00294d 120px,
+        #3d005c 120px, #3d005c 132px,
+        #004d1a 132px, #004d1a 146px
+      );
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    /* glowing seam */
+    #intro-seam {
+      position: absolute;
+      top: 0; bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      background: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(0,255,255,0.7) 15%,
+        var(--dexter-cyan) 50%,
+        rgba(0,255,255,0.7) 85%,
+        transparent 100%
+      );
+      box-shadow: 0 0 14px var(--dexter-cyan), 0 0 30px rgba(0,255,255,0.25);
+      z-index: 10002;
+    }
+    /* door handle */
+    #intro-handle {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 2px solid var(--dexter-cyan);
+      background: rgba(0, 4, 18, 0.95);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      z-index: 10003;
+      box-shadow: 0 0 22px var(--dexter-cyan), inset 0 0 12px rgba(0,255,255,0.08);
+    }
+    /* terminal */
+    #intro-terminal {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      pointer-events: none;
+      gap: 0.4rem;
+      padding: 2rem;
+    }
+    #intro-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-weight: 900;
+      color: var(--dexter-cyan);
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px var(--dexter-cyan);
+      margin-bottom: 1.5rem;
+    }
+    #intro-code {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.6rem, 1.3vw, 0.82rem);
+      color: rgba(0,255,255,0.85);
+      white-space: pre;
+      line-height: 1.9;
+      text-shadow: 0 0 6px rgba(0,255,255,0.4);
+      min-width: min(360px, 85vw);
+      max-width: 85vw;
+    }
+    #intro-cursor {
+      color: var(--dexter-cyan);
+      animation: blink-cursor 0.5s step-end infinite;
+    }
+    @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+    #intro-access {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.8rem);
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: var(--dexter-cyan);
+      text-shadow: 0 0 30px var(--dexter-cyan), 0 0 60px rgba(0,255,255,0.4);
+      opacity: 0;
+      margin-top: 1rem;
+    }
+
     /* ─── RESPONSIVE ─── */
     @media (max-width: 700px) {
       .nav-links { display: none; }
@@ -497,6 +623,19 @@
   </style>
 </head>
 <body>
+
+  <!-- LAB ENTRANCE SEQUENCE -->
+  <div id="intro">
+    <div id="intro-left"  class="intro-panel"></div>
+    <div id="intro-right" class="intro-panel"></div>
+    <div id="intro-seam"></div>
+    <div id="intro-handle"><span id="intro-lock">🔒</span></div>
+    <div id="intro-terminal">
+      <div id="intro-logo">LAB::MIRAN</div>
+      <div id="intro-code"><span id="intro-text"></span><span id="intro-cursor">█</span></div>
+      <div id="intro-access">ACCESS GRANTED</div>
+    </div>
+  </div>
 
   <!-- NAV -->
   <nav id="nav">
@@ -617,6 +756,9 @@
 
 <script>
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+  // Hide hero + nav immediately so they're invisible during the intro
+  gsap.set(['#nav', '#badge', '#line1', '#line2', '#hero-sub', '#hero-cta'], { opacity: 0 });
 
   /* ══════════════════════════════════════
      i18n — translations
@@ -742,50 +884,108 @@
   });
 
   /* ══════════════════════════════════════
-     Existing animations
+     Lab Entrance — Bookcase Door Sequence
   ══════════════════════════════════════ */
+  (function runIntro() {
+    const intro    = document.getElementById('intro');
+    const textEl   = document.getElementById('intro-text');
+    const accessEl = document.getElementById('intro-access');
+    const lockEl   = document.getElementById('intro-lock');
+    const handleEl = document.getElementById('intro-handle');
 
-  // ── NAV slide in
-  gsap.from('#nav', { y: -60, opacity: 0, duration: 0.8, ease: 'power3.out' });
+    const LINES = [
+      'MIRAN LAB OS v2.0.26',
+      'BOOTING SECURE ENVIRONMENT...',
+      '',
+      '> PROXMOX HOST...........[OK]',
+      '> DOCKER DAEMON..........[OK]',
+      '> NEXTCLOUD SYNC.........[OK]',
+      '> BESZEL TELEMETRY.......[OK]',
+      '> SCANNING IDENTITY......',
+    ];
 
-  // ── Rings spin
-  gsap.to('#r1', { rotation: 360,  duration: 24, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-  gsap.to('#r2', { rotation: -360, duration: 36, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-  gsap.to('#r3', { rotation: 360,  duration: 60, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+    let typed = '', li = 0, ci = 0;
 
-  // ── Hero entrance
-  const heroTl = gsap.timeline({ delay: 0.3 });
-  heroTl
-    .from('#badge',    { y: 30, opacity: 0, duration: 0.6, ease: 'back.out(2)' })
-    .from('#line1',    { x: -80, opacity: 0, duration: 0.7, ease: 'power3.out' }, '-=0.2')
-    .from('#line2',    { x:  80, opacity: 0, duration: 0.7, ease: 'power3.out' }, '-=0.5')
-    .from('#hero-sub', { y: 20, opacity: 0, duration: 0.5 }, '-=0.2')
-    .from('#hero-cta', { y: 20, opacity: 0, duration: 0.5 }, '-=0.2');
+    function tick() {
+      if (li >= LINES.length) {
+        typed += '[CONFIRMED]';
+        textEl.textContent = typed;
+        gsap.set(accessEl, { y: 15 });
+        gsap.to(accessEl, { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(2)', delay: 0.2 });
+        gsap.to(handleEl, {
+          boxShadow: '0 0 60px var(--dexter-cyan), inset 0 0 20px rgba(0,255,255,0.3)',
+          scale: 1.25, duration: 0.3, yoyo: true, repeat: 1,
+          onComplete() { lockEl.textContent = '🔓'; setTimeout(openDoors, 500); }
+        });
+        return;
+      }
+      const line = LINES[li];
+      if (ci < line.length) {
+        const ch = line[ci++];
+        typed = LINES.slice(0, li).join('\n') + (li > 0 ? '\n' : '') + line.slice(0, ci);
+        textEl.textContent = typed;
+        setTimeout(tick, ch === '.' ? 55 : 18);
+      } else {
+        li++; ci = 0;
+        typed = LINES.slice(0, li).join('\n');
+        textEl.textContent = typed;
+        setTimeout(tick, LINES[li - 1] === '' ? 30 : 90);
+      }
+    }
 
-  // ── Cards stagger on scroll
-  gsap.from('.card', {
-    scrollTrigger: { trigger: '.cards', start: 'top 80%' },
-    y: 60, opacity: 0, duration: 0.6, stagger: 0.12, ease: 'power3.out'
-  });
+    function openDoors() {
+      gsap.timeline()
+        .to('#intro-terminal', { opacity: 0, duration: 0.35, ease: 'power2.in' })
+        .to('#intro-seam, #intro-handle', { opacity: 0, duration: 0.25 }, '-=0.15')
+        .to('#intro-left',  { x: '-102%', duration: 1.4, ease: 'power4.inOut' }, '-=0.05')
+        .to('#intro-right', { x:  '102%', duration: 1.4, ease: 'power4.inOut' }, '<')
+        .call(() => {
+          intro.style.pointerEvents = 'none';
+          gsap.to(intro, { opacity: 0, duration: 0.2, onComplete: () => intro.remove() });
+          startMainAnimations();
+        }, [], '-=0.4');
+    }
 
-  // ── Cards hover glitch pulse
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('mouseenter', () => gsap.to(card, { scale: 1.02, duration: 0.15, ease: 'power2.out' }));
-    card.addEventListener('mouseleave', () => gsap.to(card, { scale: 1,    duration: 0.25, ease: 'power2.inOut' }));
-  });
+    tick();
+  })();
 
-  // ── Experiments header on scroll
-  gsap.from('.experiments-header', {
-    scrollTrigger: { trigger: '.experiments-header', start: 'top 85%' },
-    y: 30, opacity: 0, duration: 0.7, ease: 'power3.out'
-  });
+  /* ══════════════════════════════════════
+     Main animations — run after doors open
+  ══════════════════════════════════════ */
+  function startMainAnimations() {
+    gsap.fromTo('#nav', { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' });
 
-  // ── Status bar
-  gsap.from('.stat', {
-    scrollTrigger: { trigger: '.terminal-bar', start: 'top 90%' },
-    x: -30, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out'
-  });
+    gsap.to('#r1', { rotation: 360,  duration: 24, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+    gsap.to('#r2', { rotation: -360, duration: 36, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+    gsap.to('#r3', { rotation: 360,  duration: 60, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
 
+    gsap.timeline({ delay: 0.2 })
+      .fromTo('#badge',    { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)' })
+      .fromTo('#line1',    { x: -80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, '-=0.2')
+      .fromTo('#line2',    { x:  80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, '-=0.5')
+      .fromTo('#hero-sub', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, '-=0.2')
+      .fromTo('#hero-cta', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, '-=0.2');
+
+    gsap.from('.card', {
+      scrollTrigger: { trigger: '.cards', start: 'top 80%' },
+      y: 60, opacity: 0, duration: 0.6, stagger: 0.12, ease: 'power3.out'
+    });
+
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mouseenter', () => gsap.to(card, { scale: 1.02, duration: 0.15, ease: 'power2.out' }));
+      card.addEventListener('mouseleave', () => gsap.to(card, { scale: 1,    duration: 0.25, ease: 'power2.inOut' }));
+    });
+
+    gsap.from('.experiments-header', {
+      scrollTrigger: { trigger: '.experiments-header', start: 'top 85%' },
+      y: 30, opacity: 0, duration: 0.7, ease: 'power3.out'
+    });
+
+    gsap.from('.stat', {
+      scrollTrigger: { trigger: '.terminal-bar', start: 'top 90%' },
+      x: -30, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out'
+    });
+  }
 
 </script>
 </body>
